@@ -1,9 +1,6 @@
-// Example of Image Picker in React Native
-// https://aboutreact.com/example-of-image-picker-in-react-native/
- 
-// Import React
-import React, {useState} from 'react';
-// Import required components
+import * as React from 'react';
+import {useState} from 'react';
+
 import {
   SafeAreaView,
   StyleSheet,
@@ -13,25 +10,61 @@ import {
   Image,
   Platform,
   PermissionsAndroid,
+  Button,
+  ImageBackground,
 } from 'react-native';
  
-// Import Image Picker
-// import ImagePicker from 'react-native-image-picker';
 import {
   launchCamera,
   launchImageLibrary
 } from 'react-native-image-picker';
 
-
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
 var base64_str = "";
 var dataa;
- 
-const App = () => {
+
+function HomeScreen({ navigation }) {
+  return (
+    <ImageBackground
+    source={require('./bg_img4.jpg')}
+    style={styles.background}
+    >
+      
+      {/*<Text style={styles.HometitleText}>
+        What do you want to calculate?
+      </Text>*/}
+      <View>
+        <TouchableOpacity
+            activeOpacity={0.5}
+            onPress={() => navigation.navigate('Rock mass characterisation')}>
+            <Text style={styles.HomeButtons}>Rock mass characterisation</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+            activeOpacity={0.5}
+            onPress={() => navigation.navigate('GSI')}>
+            <Text style={styles.HomeButtons}>Geological Strength Index(GSI)</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+            activeOpacity={0.5}
+            onPress={() => navigation.navigate('Failure')}>
+            <Text style={styles.HomeButtons}>Detect Failure</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+            activeOpacity={0.5}
+            onPress={() => navigation.navigate('CollectData')}>
+            <Text style={styles.HomeButtons}>Collect Data</Text>
+        </TouchableOpacity>
+      </View>
+    </ImageBackground>
+  );
+}
+
+function RockScreen({ navigation }) {
+
   const [filePath, setFilePath] = useState({});
   const [processedImage, setProcessedImage] = useState('');
-  const [button1, setButton1] = useState(true);
-  const [button2, setButton2] = useState(true);
   const [rqd, setRqd] = useState(-0.1);
   const [jointSpacing, setJointSpacing] = useState('');
  
@@ -169,7 +202,7 @@ const App = () => {
 
  
   const chooseFile = (type) => {
-    setButton1(false);
+    
     let options = {
       mediaType: type,
       maxWidth: 300,
@@ -197,12 +230,9 @@ const App = () => {
       setFilePath(response['assets'][0]);
     });
   };
- 
+
   return (
     <SafeAreaView style={{flex: 1}}>
-      <Text style={styles.titleText}>
-        Rock mass characterisation
-      </Text>
       <View style={styles.container}>
         
         <Image
@@ -235,13 +265,89 @@ const App = () => {
       </View>
     </SafeAreaView>
   );
-};
- 
-export default App;
- 
+}
+
+function GSIscreen({ navigation }) {
+  return (
+    <SafeAreaView style={{flex: 1}}>
+      <Text style={styles.titleText}>
+        Geological Strength Index(GSI)
+      </Text>
+      <View style={styles.container}>
+        
+        {/*<Image
+          source={{uri: filePath['uri']}}
+          style={styles.imageStyle}
+  />*/}
+        
+        <TouchableOpacity
+          activeOpacity={0.5}
+          style={styles.buttonStyle}
+          onPress={() => chooseFile('photo')}>
+          <Text style={styles.textStyle}>calculate GSI</Text>
+        </TouchableOpacity>
+        
+        <Button title="Go back" onPress={() => navigation.goBack()} />
+        
+      </View>
+    </SafeAreaView>
+  );
+}
+
+function FailureScreen({ navigation }) {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Button title="Go back" onPress={() => navigation.goBack()} />
+    </View>
+  );
+}
+
+function DataScreen({ navigation }) {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <Button title="Go back" onPress={() => navigation.goBack()} />
+    </View>
+  );
+}
+
+const Stack = createStackNavigator();
+
+function MyStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
+      <Stack.Screen name="Rock mass characterisation" component={RockScreen} />
+      <Stack.Screen name="GSI" component={GSIscreen} />
+      <Stack.Screen name="Failure" component={FailureScreen} />
+      <Stack.Screen name="CollectData" component={DataScreen} />
+    </Stack.Navigator>
+  );
+}
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <MyStack />
+    </NavigationContainer>
+  );
+}
+
 const styles = StyleSheet.create({
+  background: {
+    width: '100%',
+    height: '100%'
+  },
+  HometitleText: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingVertical: 20,
+    color: 'white',
+  },
   container: {
-    flex: 1,
+    flex: 1,    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingVertical: 20,
     padding: 10,
     backgroundColor: '#fff',
     alignItems: 'center',
@@ -259,10 +365,24 @@ const styles = StyleSheet.create({
   },
   buttonStyle: {
     alignItems: 'center',
+    backgroundColor: "gray",
     backgroundColor: '#DDDDDD',
-    padding: 5,
+    padding: 2,
     marginVertical: 10,
     width: 250,
+    borderRadius: 10,
+  },
+  HomeButtons: {
+    backgroundColor: '#dcdada',
+    color: 'black',
+    width: "75%",
+    borderRadius: 15,
+    textAlign: 'center',
+    marginLeft: '11%',
+    padding: "2%",
+    fontSize:  22,
+    marginTop: '23%'
+
   },
   imageStyle: {
     width: 200,

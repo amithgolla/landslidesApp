@@ -15,7 +15,7 @@
     }),
   },
   resolver: {
-    sourceExts: ['jsx', 'js', 'ts'],
+    sourceExts: ['js', 'json', 'ts', 'tsx'],
   },
 };
 
