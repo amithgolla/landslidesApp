@@ -12,6 +12,7 @@ import {
   PermissionsAndroid,
   Button,
   ImageBackground,
+  TextInput
 } from 'react-native';
  
 import {
@@ -21,6 +22,9 @@ import {
 
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { Modal } from 'react-native';
+import ImageViewer from 'react-native-image-zoom-viewer';
+import { out } from 'react-native/Libraries/Animated/Easing';
 
 var base64_str = "";
 var dataa;
@@ -43,7 +47,7 @@ function HomeScreen({ navigation }) {
         </TouchableOpacity>
         <TouchableOpacity
             activeOpacity={0.5}
-            onPress={() => navigation.navigate('GSI')}>
+            onPress={() => navigation.navigate('Geological Strength Index(GSI)')}>
             <Text style={styles.HomeButtons}>Geological Strength Index(GSI)</Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -64,7 +68,6 @@ function HomeScreen({ navigation }) {
 function RockScreen({ navigation }) {
 
   const [filePath, setFilePath] = useState({});
-  const [processedImage, setProcessedImage] = useState('');
   const [rqd, setRqd] = useState(-0.1);
   const [jointSpacing, setJointSpacing] = useState('');
  
@@ -141,7 +144,10 @@ function RockScreen({ navigation }) {
 
   await processImage();
   var p_str = "data:image/jpeg;base64," + dataa['res_uri'];
-  setProcessedImage(p_str);
+  var dict = {
+    uri: p_str
+  };
+  setFilePath(dict);
   var num = dataa['rqd'];
   setRqd(num.toFixed(4));
   var jsp_array = dataa['linespacing'];
@@ -177,6 +183,7 @@ function RockScreen({ navigation }) {
     let isCameraPermitted = await requestCameraPermission();
     let isStoragePermitted = await requestExternalWritePermission();
     if (isCameraPermitted && isStoragePermitted) {
+      console.log('came here');
       launchCamera(options, (response) => {
         //console.log('Response = ', response);
  
@@ -198,6 +205,7 @@ function RockScreen({ navigation }) {
       });
     }
   };
+
 
 
  
@@ -234,25 +242,32 @@ function RockScreen({ navigation }) {
   return (
     <SafeAreaView style={{flex: 1}}>
       <View style={styles.container}>
-        
-        <Image
+
+      <TouchableOpacity
+          activeOpacity={0.5}
+          style={styles.imageStyle}
+          onPress={() => navigation.navigate('GSI')}>
+          <Image
           source={{uri: filePath['uri']}}
           style={styles.imageStyle}
         />
-        {<Image
-           source={processedImage ? {uri: processedImage} : null}
-          style={styles.imageStyle}
-        /> }
-
+        </TouchableOpacity>
+        
         <Text style={styles.textStyle}>{rqd != -0.1 ? 'RQD(Rock Quality Designation): '+rqd:null}</Text>
         <Text style={styles.textStyle}>{jointSpacing != '' ? 'Joint Spacing: '+jointSpacing: null}</Text>
-        
         
         <TouchableOpacity
           activeOpacity={0.5}
           style={styles.buttonStyle}
+          onPress={() => captureImage('photo')}>
+          <Text style={styles.textStyle}>Camera</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.5}
+          style={styles.buttonStyle}
           onPress={() => chooseFile('photo')}>
-          <Text style={styles.textStyle}>Choose Image</Text>
+          <Text style={styles.textStyle}>Gallery</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
@@ -270,9 +285,6 @@ function RockScreen({ navigation }) {
 function GSIscreen({ navigation }) {
   return (
     <SafeAreaView style={{flex: 1}}>
-      <Text style={styles.titleText}>
-        Geological Strength Index(GSI)
-      </Text>
       <View style={styles.container}>
         
         {/*<Image
@@ -287,18 +299,70 @@ function GSIscreen({ navigation }) {
           <Text style={styles.textStyle}>calculate GSI</Text>
         </TouchableOpacity>
         
-        <Button title="Go back" onPress={() => navigation.goBack()} />
-        
       </View>
     </SafeAreaView>
   );
 }
 
 function FailureScreen({ navigation }) {
+  const [Ds, setDs] = useState();
+  const [Dd, setDd] = useState();
+  const [Ss, setSs] = useState();
+  const [Sd, setSd] = useState();
+  const [Fa, setFa] = useState();
+  const [output, setOutput] = useState("");
+
+  const afterClick = async () => {
+    if(Ds == null || Dd == null || Ss == null || Sd == null || Fa == null){
+      alert('Some fields are empty! All fields are mandatory.');
+      return;
+    }
+    const requestOptions = {
+      method: 'POST',
+      body: Ds.toString() + " " + Ss.toString() + " " + Dd.toString() + " " + Sd.toString() + " " + Fa.toString(),
+    };
+
+  const processFailure = async () => {
+    //var array;
+    try {
+      const response = await fetch(
+        'https://landslides-btp.herokuapp.com/failure', requestOptions
+      );
+      var data = await response.text();
+      setOutput(data);
+      //array = JSON.stringify(data);
+      console.log(data);
+      
+    } catch (error) {
+      console.error(error);
+      alert('Cannot process')
+      return;
+    }
+  };
+
+  await processFailure();
+
+
+
+  };
+
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Button title="Go back" onPress={() => navigation.goBack()} />
-    </View>
+    <SafeAreaView style={{flex: 1}}>
+      <View style={styles.container}>
+      <TextInput style={styles.input} placeholder="Discontinuity strike" keyboardType="phone-pad" onChangeText={(value) => setDs(value)}/>
+      <TextInput style={styles.input} placeholder="Discontinuity Dip" keyboardType="phone-pad" onChangeText={(value) => setDd(value)}/>
+      <TextInput style={styles.input} placeholder="Slope strike" keyboardType="phone-pad" onChangeText={(value) => setSs(value)}/>
+      <TextInput style={styles.input} placeholder="Slope Dip" keyboardType="phone-pad" onChangeText={(value) => setSd(value)}/>
+      <TextInput style={styles.input} placeholder="Friction angle" keyboardType="phone-pad" onChangeText={(value) => setFa(value)}/>
+      <Text style={styles.failureOutput}>{output}</Text>
+      <TouchableOpacity
+          activeOpacity={0.5}
+          style={styles.buttonStyle}
+          onPress={() => afterClick()}>
+          <Text style={styles.textStyle}>Process</Text>
+      </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -317,7 +381,7 @@ function MyStack() {
     <Stack.Navigator>
       <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
       <Stack.Screen name="Rock mass characterisation" component={RockScreen} />
-      <Stack.Screen name="GSI" component={GSIscreen} />
+      <Stack.Screen name="Geological Strength Index(GSI)" component={GSIscreen} />
       <Stack.Screen name="Failure" component={FailureScreen} />
       <Stack.Screen name="CollectData" component={DataScreen} />
     </Stack.Navigator>
@@ -360,8 +424,16 @@ const styles = StyleSheet.create({
   },
   textStyle: {
     padding: 5,
+    margin: 5,
     color: 'black',
     textAlign: 'center',
+  },
+  failureOutput: {
+    padding: 5,
+    margin: 5,
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 13,
   },
   buttonStyle: {
     alignItems: 'center',
@@ -388,5 +460,13 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     margin: 5,
+  },
+  input: {
+    borderColor: "gray",
+    width: "100%",
+    borderWidth: 1,
+    borderRadius: 10,
+    margin: 15,
+    padding: 10,
   },
 });
