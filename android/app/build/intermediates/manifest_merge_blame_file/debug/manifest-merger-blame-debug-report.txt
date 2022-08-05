@@ -1,0 +1,124 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.landslides2"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="31" />
+10
+11    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+11-->/home/amith/Desktop/React-Native/landslides2/android/app/src/debug/AndroidManifest.xml:5:5-77
+11-->/home/amith/Desktop/React-Native/landslides2/android/app/src/debug/AndroidManifest.xml:5:22-75
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:4:5-67
+12-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:4:22-64
+13    <uses-permission android:name="android.permission.CAMERA" />
+13-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:5:5-64
+13-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:5:22-62
+14    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+14-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:6:5-80
+14-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:6:22-78
+15    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+15-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:7:5-78
+15-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:7:22-76
+16    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+16-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:8:5-80
+16-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:8:22-78
+17    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+17-->[com.facebook.flipper:flipper:0.125.0] /home/amith/.gradle/caches/transforms-3/95e931fbbfdb29d8fe263063f71e1fc3/transformed/jetified-flipper-0.125.0/AndroidManifest.xml:16:5-76
+17-->[com.facebook.flipper:flipper:0.125.0] /home/amith/.gradle/caches/transforms-3/95e931fbbfdb29d8fe263063f71e1fc3/transformed/jetified-flipper-0.125.0/AndroidManifest.xml:16:22-73
+18
+19    <application
+19-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:10:5-29:19
+20        android:name="com.landslides2.MainApplication"
+20-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:11:7-38
+21        android:allowBackup="false"
+21-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:15:7-34
+22        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+22-->[androidx.core:core:1.7.0] /home/amith/.gradle/caches/transforms-3/b5a8e99dac667ebea08e9f9757d3b404/transformed/core-1.7.0/AndroidManifest.xml:24:18-86
+23        android:debuggable="true"
+24        android:icon="@mipmap/ic_launcher"
+24-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:13:7-41
+25        android:label="@string/app_name"
+25-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:12:7-39
+26        android:roundIcon="@mipmap/ic_launcher_round"
+26-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:14:7-52
+27        android:theme="@style/AppTheme"
+27-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:16:7-38
+28        android:usesCleartextTraffic="true" >
+28-->/home/amith/Desktop/React-Native/landslides2/android/app/src/debug/AndroidManifest.xml:8:9-44
+29        <activity
+29-->/home/amith/Desktop/React-Native/landslides2/android/app/src/debug/AndroidManifest.xml:11:9-111
+30            android:name="com.facebook.react.devsupport.DevSettingsActivity"
+30-->/home/amith/Desktop/React-Native/landslides2/android/app/src/debug/AndroidManifest.xml:11:19-83
+31            android:exported="false" />
+31-->/home/amith/Desktop/React-Native/landslides2/android/app/src/debug/AndroidManifest.xml:11:84-108
+32        <activity
+32-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:17:7-28:18
+33            android:name="com.landslides2.MainActivity"
+33-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:18:9-37
+34            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
+34-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:20:9-118
+35            android:exported="true"
+35-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:23:9-32
+36            android:label="@string/app_name"
+36-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:19:9-41
+37            android:launchMode="singleTask"
+37-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:21:9-40
+38            android:windowSoftInputMode="adjustResize" >
+38-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:22:9-51
+39            <intent-filter>
+39-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:24:9-27:25
+40                <action android:name="android.intent.action.MAIN" />
+40-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:25:13-65
+40-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:25:21-62
+41
+42                <category android:name="android.intent.category.LAUNCHER" />
+42-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:26:13-73
+42-->/home/amith/Desktop/React-Native/landslides2/android/app/src/main/AndroidManifest.xml:26:23-70
+43            </intent-filter>
+44        </activity>
+45
+46        <provider
+46-->[:react-native-image-picker] /home/amith/Desktop/React-Native/landslides2/node_modules/react-native-image-picker/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:10:9-18:20
+47            android:name="com.imagepicker.ImagePickerProvider"
+47-->[:react-native-image-picker] /home/amith/Desktop/React-Native/landslides2/node_modules/react-native-image-picker/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:11:13-63
+48            android:authorities="com.landslides2.imagepickerprovider"
+48-->[:react-native-image-picker] /home/amith/Desktop/React-Native/landslides2/node_modules/react-native-image-picker/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:12:13-71
+49            android:exported="false"
+49-->[:react-native-image-picker] /home/amith/Desktop/React-Native/landslides2/node_modules/react-native-image-picker/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:13:13-37
+50            android:grantUriPermissions="true" >
+50-->[:react-native-image-picker] /home/amith/Desktop/React-Native/landslides2/node_modules/react-native-image-picker/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:14:13-47
+51            <meta-data
+51-->[:react-native-image-picker] /home/amith/Desktop/React-Native/landslides2/node_modules/react-native-image-picker/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:15:13-17:70
+52                android:name="android.support.FILE_PROVIDER_PATHS"
+52-->[:react-native-image-picker] /home/amith/Desktop/React-Native/landslides2/node_modules/react-native-image-picker/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:16:17-67
+53                android:resource="@xml/imagepicker_provider_paths" />
+53-->[:react-native-image-picker] /home/amith/Desktop/React-Native/landslides2/node_modules/react-native-image-picker/android/build/intermediates/merged_manifest/debug/AndroidManifest.xml:17:17-67
+54        </provider>
+55        <provider
+55-->[androidx.emoji2:emoji2:1.0.0] /home/amith/.gradle/caches/transforms-3/31798a0ea3f25ea98e44c876b4851b08/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:26:9-34:20
+56            android:name="androidx.startup.InitializationProvider"
+56-->[androidx.emoji2:emoji2:1.0.0] /home/amith/.gradle/caches/transforms-3/31798a0ea3f25ea98e44c876b4851b08/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:27:13-67
+57            android:authorities="com.landslides2.androidx-startup"
+57-->[androidx.emoji2:emoji2:1.0.0] /home/amith/.gradle/caches/transforms-3/31798a0ea3f25ea98e44c876b4851b08/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:28:13-68
+58            android:exported="false" >
+58-->[androidx.emoji2:emoji2:1.0.0] /home/amith/.gradle/caches/transforms-3/31798a0ea3f25ea98e44c876b4851b08/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:29:13-37
+59            <meta-data
+59-->[androidx.emoji2:emoji2:1.0.0] /home/amith/.gradle/caches/transforms-3/31798a0ea3f25ea98e44c876b4851b08/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:31:13-33:52
+60                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+60-->[androidx.emoji2:emoji2:1.0.0] /home/amith/.gradle/caches/transforms-3/31798a0ea3f25ea98e44c876b4851b08/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:32:17-75
+61                android:value="androidx.startup" />
+61-->[androidx.emoji2:emoji2:1.0.0] /home/amith/.gradle/caches/transforms-3/31798a0ea3f25ea98e44c876b4851b08/transformed/jetified-emoji2-1.0.0/AndroidManifest.xml:33:17-49
+62            <meta-data
+62-->[androidx.lifecycle:lifecycle-process:2.4.0] /home/amith/.gradle/caches/transforms-3/39517e1b011367242185b54afc0b3c9e/transformed/jetified-lifecycle-process-2.4.0/AndroidManifest.xml:31:13-33:52
+63                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+63-->[androidx.lifecycle:lifecycle-process:2.4.0] /home/amith/.gradle/caches/transforms-3/39517e1b011367242185b54afc0b3c9e/transformed/jetified-lifecycle-process-2.4.0/AndroidManifest.xml:32:17-78
+64                android:value="androidx.startup" />
+64-->[androidx.lifecycle:lifecycle-process:2.4.0] /home/amith/.gradle/caches/transforms-3/39517e1b011367242185b54afc0b3c9e/transformed/jetified-lifecycle-process-2.4.0/AndroidManifest.xml:33:17-49
+65        </provider>
+66    </application>
+67
+68</manifest>
