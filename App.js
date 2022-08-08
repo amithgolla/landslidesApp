@@ -63,11 +63,11 @@ function HomeScreen({ navigation }) {
             onPress={() => navigation.navigate('Kinematic Analysis')}>
             <Text style={styles.HomeButtons}>Kinematic Analysis</Text>
         </TouchableOpacity>
-        {/*<TouchableOpacity
+        <TouchableOpacity
             activeOpacity={0.5}
-            onPress={() => navigation.navigate('Failure2')}>
-            <Text style={styles.HomeButtons}>Detect Failure2</Text>
-        </TouchableOpacity>*/}
+            onPress={() => navigation.navigate('Kinematic Analysis through data')}>
+            <Text style={styles.HomeButtons}>Kinematic Analysis through data</Text>
+        </TouchableOpacity>
         <TouchableOpacity
             activeOpacity={0.5}
             onPress={() => navigation.navigate('CollectData')}>
@@ -141,8 +141,8 @@ function RmrScreen({ navigation }) {
       headers:{
         'Accept': 'application/json',
         'Content-Type':'apapi response in react nativeplication/json'
-    }
-  };
+      }
+    };
 
   const processImage = async () => {
     //var array;
@@ -396,9 +396,9 @@ function RmrScreen({ navigation }) {
           onPress={() => afterClick()}>
           <Text style={styles.textStyle}>Process Image</Text>
         </TouchableOpacity>:null}
-        <Text style={styles.textStyle}>{rqd != -0.1 ? 'Rock Quality Designation(RQD): '+rqd:null}</Text>
-        <Text style={styles.textStyle}>{jointSpacing != '' ? 'Joint Spacing: '+jointSpacing: null}</Text>
-        <Text style={styles.textStyle}>{gsi != '' ? 'Geological Strength Index(GSI): '+gsi: null}</Text>
+        <Text style={{padding: 5,margin: 5,color: 'black',textAlign: 'center',fontSize:20}}>{rqd != -0.1 ? 'Rock Quality Designation(RQD): '+rqd:null}</Text>
+        <Text style={{padding: 5,margin: 5,color: 'black',textAlign: 'center',fontSize:20}}>{jointSpacing != '' ? 'Joint Spacing: '+jointSpacing: null}</Text>
+        <Text style={{padding: 5,margin: 5,color: 'black',textAlign: 'center',fontSize:20}}>{gsi != '' ? 'Geological Strength Index(GSI): '+gsi: null}</Text>
 
         
         </ScrollView>
@@ -459,7 +459,7 @@ function KinematicAnalysisScreen({ navigation }) {
       <TextInput style={styles.input} placeholder="Slope strike" keyboardType="phone-pad" onChangeText={(value) => setSs(value)}/>
       <TextInput style={styles.input} placeholder="Slope Dip" keyboardType="phone-pad" onChangeText={(value) => setSd(value)}/>
       <TextInput style={styles.input} placeholder="Friction angle" keyboardType="phone-pad" onChangeText={(value) => setFa(value)}/>
-      <Text style={styles.failureOutput}>{output}</Text>
+      <Text style={{padding: 5,margin: 5,color: 'black',textAlign: 'center',fontSize:20}}>{output}</Text>
       <TouchableOpacity
           activeOpacity={0.5}
           style={styles.buttonStyle}
@@ -471,43 +471,97 @@ function KinematicAnalysisScreen({ navigation }) {
   );
 }
 
-function FailureScreen2({ navigation }) {
-  const [inputs, setInputs] = useState([{strike2: -1, Dip2: -1}]);
-  const addHandler = ()=>{
-    const _inputs = [...inputs];
-    _inputs.push({key: '', value: ''});
-    setInputs(_inputs);
-  }
+function KinematicAnalysisThroughDataScreen({ navigation }) {
+  const [failureParam, setFailureParam] = useState({slopeStrike: -1, slopeDip: -1, fricAngle: 35, jstrikes: "", jdips: ""});
+  const [output, setOutput] = useState({});
+  const [check, setCheck] = useState(true);
 
-  const deleteHandler = (key)=>{
-    const _inputs = inputs.filter((input,index) => index != key);
-    setInputs(_inputs);
-  }
+  const afterClick = async () => {
+    //console.log(failureParam);
+    if(failureParam['slopeStrike'] == -1 || failureParam['slopeDip'] == -1 || failureParam['jstrikes'] == "" || failureParam['jdips'] == ""){
+      alert('Required fields are empty! Please note that only friction angle is optional.');
+      return;
+    }
+    const requestOptions = {
+      method: 'POST',
+      body: JSON.stringify(failureParam),
+      headers:{
+        'Accept': 'application/json',
+        'Content-Type':'apapi response in react nativeplication/json'
+      }
+    };
 
-  const inputHandler = (text, key)=>{
-    const _inputs = [...inputs];
-    _inputs[key].value = text;
-    _inputs[key].key   = key;
-    setInputs(_inputs);
-    
-  }
+
+  const processFailure2 = async () => {
+    //var array;
+    try {
+      const response = await fetch(
+        'http://10.0.2.2:5000/failure2', requestOptions
+      );
+      var data = await response.json();
+      setCheck(false);
+      setOutput(data);
+      //array = JSON.stringify(data);
+      //console.log(data);
+      
+    } catch (error) {
+      console.error(error);
+      alert('Cannot process')
+      return;
+    }
+  };
+
+  await processFailure2();
+
+
+
+  };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={{flex: 1}}>
       <ScrollView style={styles.inputsContainer}>
-      {inputs.map((input, key)=>(
-        <View style={styles.inputContainer} key={key}>
-          <TextInput placeholder={"Enter Strike"} value={input.value}  onChangeText={(text)=>inputHandler(text,key)}/>
-          <TouchableOpacity onPress = {()=> deleteHandler(key)}>
-            <Text style={{color: "red", fontSize: 13}}>Delete</Text>
-          </TouchableOpacity> 
-        </View>
-      ))}
-      </ScrollView>
-      <Button title="Add" onPress={addHandler} />
-    </View>
-  );
+      <TouchableOpacity
+          activeOpacity={0.5}
+          style={{alignItems: 'center',
+          backgroundColor: "gray",
+          backgroundColor: '#DDDDDD',
+          padding: 2,
+          marginLeft:15,
+          width: 160,
+          fontSize:5,
+          borderRadius: 10,}}
+          onPress={() => alert("1. Scale should be provided as the true width of the portion captured in meters.\n\n2. UCS should be given in MPa\n\n3. RMR will not be obtained if any of the parameters are missing, but RQD and joint spacing will be obtained if an image is uploaded.\n\n4. Upload a high quality image of the rock mass. Avoid noise such as grass, roads, trees, etc. The estimation may be deviated if the image contains these noise mentioned.")}>
+          <Text style={{color:'black',}}>Instructions</Text>
+        </TouchableOpacity>
+        <TextInput style={styles.input} placeholder="Enter Slope Strike" keyboardType="phone-pad" onChangeText={(value) => setFailureParam({...failureParam, slopeStrike: value})}/>
+        <TextInput style={styles.input} placeholder="Enter Slope Dip" keyboardType="phone-pad" onChangeText={(value) => setFailureParam({...failureParam, slopeDip: value})}/>
+        <TextInput style={styles.input} placeholder="Enter Friction Angle(Optional)" keyboardType="phone-pad" onChangeText={(value) => setFailureParam({...failureParam, fricAngle: value})}/>
+        <TextInput style={styles.input} placeholder="Enter Discontinuity Strikes seperated by a comma(,)" onChangeText={(value) => setFailureParam({...failureParam, jstrikes: value})}/>
+        <TextInput style={styles.input} placeholder="Enter Discontinuity dips seperated by a comma(,)" onChangeText={(value) => setFailureParam({...failureParam, jdips: value})}/>
+        {check?<TouchableOpacity
+          activeOpacity={0.5}
+          style={{alignItems: 'center',
+          backgroundColor: "gray",
+          backgroundColor: '#DDDDDD',
+          padding: 2,
+          marginVertical: 10,
+          marginLeft: 70,
+          width: 250,
+          borderRadius: 10,}}
+          onPress={() => afterClick()}>
+          <Text style={styles.textStyle}>Process</Text>
+        </TouchableOpacity>:null}
+        <Text style={{padding: 5,margin: 5,color: 'black',textAlign: 'center',fontSize:20}}>{output['planar_prob'] ? 'Probability of Planar sliding: '+output['planar_prob']:null}</Text>
+        <Text style={{padding: 5,margin: 5,color: 'black',textAlign: 'center',fontSize:20}}>{output['toppling_prob'] ? 'Probability of Flexural toppling: '+output['toppling_prob']:null}</Text>
+        <Text style={{padding: 5,margin: 5,color: 'black',textAlign: 'center',fontSize:20}}>{output['wedge_prob'] ? 'Probability of Wedge sliding: '+output['wedge_prob']:null}</Text>
+        {output['planar_uri'] != ""?<Image source={{uri: output['planar_uri']}} style={{width: 400, height: 450, alignItems: 'center', marginBottom:5, marginTop:5}}/>:null}
+        {output['toppling_uri'] != ""?<Image source={{uri: output['toppling_uri']}} style={{width: 400, height: 450, alignItems: 'center', marginBottom:5, marginTop:5}}/>:null}
 
+        
+        </ScrollView>
+    </SafeAreaView>
+  );
+  
   
 }
 
@@ -895,7 +949,7 @@ function MyStack() {
       <Stack.Screen name="Rock Mass Rating (RMR)" component={RmrScreen} />
       {/*<Stack.Screen name="Geological Strength Index(GSI)" component={GSIscreen} />*/}
       <Stack.Screen name="Kinematic Analysis" component={KinematicAnalysisScreen} />
-      {/*<Stack.Screen name="Failure2" component={FailureScreen2} />*/}
+      <Stack.Screen name="Kinematic Analysis through data" component={KinematicAnalysisThroughDataScreen} />
       <Stack.Screen name="CollectData" component={DataScreen} />
     </Stack.Navigator>
   );

@@ -625,27 +625,27 @@ def failure2():
         if shape_type=='plane':
             lon, lat = plane(strike, dip)
             return geometry.LineString(np.hstack((lon, lat)))
-        
+
         elif shape_type=='curved_latlims':
             lon1, lat1, lon2, lat2 = _curved_latlims(angle)
             return [geometry.LineString(np.vstack((lon1, lat1)).T), 
                     geometry.LineString(np.vstack((lon2, lat2)).T)]
-        
+
         elif shape_type=='cone':
             lon, lat = cone(90, 0, angle, segments=200)
             return geometry.Polygon(np.vstack((lon[0], lat[0])).T)
-        
+
         elif shape_type=='daylight_envelope':
             lon, lat = daylight_envelope(strike, dip)
             return geometry.Polygon(np.hstack((lon[:-1], lat[:-1])))
-        
+
         elif shape_type=='flexural_envelope':
             p_lon, p_lat = plane(0, 1e-9) # perimeter
             sl_lon, sl_lat = plane(strike, dip-angle)  # slip limit
             lon = np.vstack((p_lon, np.flip(sl_lon[1:-1])))
             lat = np.vstack((p_lat, np.flip(sl_lat[1:-1])))
             return geometry.Polygon(np.hstack((lon, lat)))
-        
+
         elif shape_type=='wedge_envelope':
             sf_lon, sf_lat = plane(0, dip) # slope face
             sl_lon, sl_lat = plane(0, angle) # slip limit
@@ -659,7 +659,7 @@ def failure2():
         """
 
         kws = {} if kws is None else kws
-        
+
         if 'lw' not in kws:
             kws.setdefault('linewidth', 1)
 
@@ -673,9 +673,9 @@ def failure2():
         else:
             if 'c' not in kws:
                 kws.setdefault('color', color)
-        
+
         kws.setdefault('label', label)
-        
+
         return kws
 
     def plane(strike, dip, segments=100, center=(0, 0)):
@@ -741,7 +741,7 @@ def failure2():
         lon1 = np.linspace(-np.pi/2, np.pi/2, segments)
         lat2 = angle * np.ones(segments)
         lon2 = lon1.copy()
-                
+
         return lon1, lat1, lon2, lat2
 
     def cone(plunge, bearing, angle, segments=100):
@@ -800,13 +800,13 @@ def failure2():
             `num_segments` x `num_strikes` arrays of longitude and latitude in
             radians.
         """
-        
+
         # Get apparent dips from -90 to +90 (azimuth difference) from slope dip 
         # direction, i.e. +0 to +180 from slope strike. This essentially generates 
         # points defining the great-circle plane that represents the slope face
         dl_bearings = np.linspace(0, 180, segments).reshape(segments, 1)
         dl_plunges = apparent_dip(dip, 90-dl_bearings)
-        
+
         # More points needed for daylight envelope for steep slopes
         if dip > 89:
             # Crop original end sections at apparent dip = 0
@@ -1062,7 +1062,7 @@ def failure2():
     class PlanarSliding(object):
         """ 
         Kinematic analysis for planar sliding failures
-    
+
         Parameters
         ----------
         strike : number
@@ -1084,18 +1084,18 @@ def failure2():
         """    
 
         def __init__(self, strike, dip, fric_angle=35, latlim=20):
-        
+
             self.strike = strike
             self.dip = dip
             self.fric_angle = fric_angle
             self.latlim = latlim
-        
+
             if latlim <= 0 or latlim >= 90:
                 raise ValueError('latlim must be > 0 and < 90')
-            
+
             if dip <= 0 or dip > 90:
                 raise ValueError('dip must be > 0 and <= 90')
-            
+
             if dip <= fric_angle:
                 raise ValueError('No planar sliding zones generated as the input'
                                 ' slope dip is shallower than the friction angle')
@@ -1104,7 +1104,7 @@ def failure2():
             """ 
             Check whether planar sliding failures are kinematically feasible on a 
             sequence of discontinuities
-        
+
             Parameters
             ----------
             strikes : numbers
@@ -1117,7 +1117,7 @@ def failure2():
                 Consider lateral limits as curved lines (align with small circles) 
                 if set to 'True'. Straight lines through the stereonet center are 
                 used if set to 'False'. Defaults to 'True'
-        
+
             Returns
             ----------
             main: squence of booleans
@@ -1127,7 +1127,7 @@ def failure2():
             """    
             strikes = (strikes-self.strike)%360
             dipdirs = (strikes+90)%360
-        
+
             if curved_lateral_limits:
                 lons, lats = pole(strikes, dips)
                 lats = np.degrees(lats)
@@ -1140,35 +1140,35 @@ def failure2():
             llons, llats = line(dips, dipdirs)
             llons = np.degrees(llons)
             daylight = llons >= 90-self.dip-1e-8  # with tolerance
-        
+
             fric_slip = dips >= self.fric_angle
-        
+
             main = within_lat & fric_slip & daylight
             secondary = ~within_lat & fric_slip & daylight
-        
+
             return main, secondary
-    
+
         def plot_kinematic(self, secondary_zone=True, construction_lines=True, 
                         slopeface=True, curved_lateral_limits=True,
                         main_kws=None, secondary_kws=None, lateral_kws=None,
                         friction_kws=None, daylight_kws=None, slope_kws=None, 
                         ax=None):
-                   
+
             """
             Generate the planar sliding kinematic analysis plot for pole vectors. 
             (Note: The discontinuity data to be used in conjunction with this plot 
             should be displayed as POLES)
-        
+
         This function plots the following elements on a StereonetAxes: 
             (1) main planar sliding zone
             (2) secondary planar sliding zones
             (3) construction lines, i.e. friction cone, lateral limits and 
                 daylight envelope
             (4) slope face
-        
+
             (2)-(4) are optioanl. The style of the elements above can be specified 
             with their kwargs, or on the artists returned by this function later.
-        
+
             Parameters
             ----------
             secondary_zone : boolean
@@ -1199,7 +1199,7 @@ def failure2():
             ax : StereonetAxes
                 The StereonetAxes to plot on. A new StereonetAxes will be generated
                 if set to 'None'. Defaults to 'None'.
-        
+
             Returns
             -------
             result : dictionary
@@ -1213,7 +1213,7 @@ def failure2():
                 - `friction` : the friction cone
                 - `lateral` : the two lateral limits
             """
-        
+
             # Convert the construction lines into shapely linestrings / polygons    
             daylight_envelope = _shape('daylight_envelope', strike=0, dip=self.dip)
             friction_cone = _shape('cone', angle=self.fric_angle)
@@ -1222,7 +1222,7 @@ def failure2():
             else:
                 lat_lim1 = _shape('plane', strike=90-self.latlim, dip=90)
                 lat_lim2 = _shape('plane', strike=90+self.latlim, dip=90)
-        
+
             # Get the failure zones (as shapely polygons) from geometry interaction
             sliding_zone = daylight_envelope.difference(friction_cone)
             split_polys = ops.split(sliding_zone,lat_lim1)
@@ -1232,19 +1232,19 @@ def failure2():
                     sliding_zone, sec_zone1 = split_polys
                 else:
                     sec_zone1, sliding_zone = split_polys
-                
+
                 split_polys = ops.split(sliding_zone,lat_lim2)
                 if split_polys[0].touches(sec_zone1):
                     sliding_zone, sec_zone2 = split_polys
                 else:
                     sec_zone2, sliding_zone = split_polys
-                
+
             # Start plotting
             if ax==None:
                 figure, axes = subplots(figsize=(8, 8))
             else:
                 axes = ax
-            
+
             # List of artists to be output
             main = []
             secondary = []
@@ -1252,14 +1252,14 @@ def failure2():
             daylight = []
             friction = []
             lateral = []
-        
+
             # Plot the main planar sliding zone
             main_kws = _set_kws(main_kws, polygon=True,
                                 color='r', alpha=0.3,
                                 label='Potential Planar Sliding Zone')
             main.extend(axes.fill(
                 *_rotate_shape(sliding_zone, self.strike), **main_kws))
-            
+
             # Plot the secondary planar sliding zones
             if secondary_zone and sec_zone_present:
                 secondary_kws = _set_kws(secondary_kws, polygon=True, 
@@ -1293,14 +1293,14 @@ def failure2():
                     *_rotate_shape(lat_lim1, self.strike), **lateral_kws))
                 lateral.extend(axes.plot(
                     *_rotate_shape(lat_lim2, self.strike), **lateral_kws2))
-            
+
             return dict(main=main, secondary=secondary, slope=slope,
                         daylight=daylight, friction=friction, lateral=lateral)
 
     class FlexuralToppling(object):
         """ 
         Kinematic analysis for flexural toppling failures
-        
+
         Parameters
         ----------
         strike : number
@@ -1320,17 +1320,17 @@ def failure2():
             lateral limits are considered to be less probable (i.e. secdondary 
             failure zones).
         """    
-        
+
         def __init__(self, strike, dip, fric_angle=35, latlim=20):
 
             self.strike = strike
             self.dip = dip
             self.fric_angle = fric_angle
             self.latlim = latlim
-            
+
             if latlim <= 0 :
                 raise ValueError('latlim must be greater than 0 degree.')
-                
+
             if latlim >= 90 :
                 raise ValueError('latlim must be smaller than 90 degrees.'
                                 ' Try 90-1e-9 if you really need to use 90.')
@@ -1338,12 +1338,12 @@ def failure2():
             if self.dip <= self.fric_angle:
                 raise ValueError('No flexural toppling zones generated as the input'
                                 ' slope dip is shallower than the friction angle')
-                
+
         def check_failure(self, strikes, dips, curved_lateral_limits=True):
             """ 
             Check whether flexural toppling failures are kinematically feasible on 
             a sequence of discontinuities
-            
+
             Parameters
             ----------
             strikes : numbers
@@ -1356,7 +1356,7 @@ def failure2():
                 Consider lateral limits as curved lines (align with small circles) 
                 if set to 'True'. Straight lines through the stereonet center are 
                 used if set to 'False'. Defaults to 'True'
-            
+
             Returns
             ----------
             main: squence of booleans
@@ -1368,7 +1368,7 @@ def failure2():
 
             strikes = (strikes-self.strike)%360
             dipdirs = (strikes+90)%360
-            
+
             lons, lats = pole(strikes, dips)
             lats = np.degrees(lats)
             lons = np.degrees(lons)
@@ -1379,34 +1379,34 @@ def failure2():
             else:
                 within_lat = ((dipdirs >= 270-self.latlim) &
                             (dipdirs <= 270+self.latlim))
-        
+
             fric_slip = lons >= 90-self.dip+self.fric_angle-1e-8 # with tolerance
-            
+
             main = within_lat & fric_slip
             secondary = ~within_lat & fric_slip
-            
+
             return main, secondary
-        
+
         def plot_kinematic(self, secondary_zone=False, construction_lines=True, 
                         slopeface=True, curved_lateral_limits=True,
                         main_kws=None, secondary_kws=None, lateral_kws=None,
                         slip_kws=None, slope_kws=None, 
                         ax=None):
-            
+
             """
             Generate the flexural toppling kinematic analysis plot for pole vectors. 
             (Note: The discontinuity data to be used in conjunction with this plot 
             should be displayed as POLES)
-            
+
             This function plots the following elements on a StereonetAxes: 
             (1) main flexural toppling zone
             (2) secondary flexural toppling zones (not normally considered)
             (3) construction lines, i.e. slip limit and lateral limits
             (4) slope face
-            
+
             (2)-(4) are optioanl. The style of the elements above can be specified 
             with their kwargs, or on the artists returned by this function later.
-            
+
             Parameters
             ----------
             secondary_zone : boolean
@@ -1437,7 +1437,7 @@ def failure2():
             ax : StereonetAxes
                 The StereonetAxes to plot on. A new StereonetAxes will be generated
                 if set to 'None'. Defaults to 'None'.
-            
+
             Returns
             -------
             result : dictionary
@@ -1459,17 +1459,17 @@ def failure2():
             else:
                 lat_lim1 = _shape('plane', strike=90+self.latlim, dip=90)
                 lat_lim2 = _shape('plane', strike=90-self.latlim, dip=90)
-            
+
             # Get the failure zones (as shapely polygons) from geometry interaction
             sec_zone1, toppling_zone = ops.split(envelope, lat_lim1)
             toppling_zone, sec_zone2 = ops.split(toppling_zone, lat_lim2)
-            
+
             # Plotting
             if ax==None:
                 figure, axes = subplots(figsize=(8, 8))
             else:
                 axes = ax
-            
+
             # List of artists to be output
             main = []
             secondary = []
@@ -1483,7 +1483,7 @@ def failure2():
                                 label='Potential Flexural Toppling Zone')
             main.extend(axes.fill(
                 *_rotate_shape(toppling_zone, self.strike), **main_kws))
-            
+
             # Plot the secondary flexural toppling zones
             if secondary_zone:
                 secondary_kws = _set_kws(secondary_kws, polygon=True,
@@ -1495,7 +1495,7 @@ def failure2():
                     *_rotate_shape(sec_zone1, self.strike), **secondary_kws))
                 secondary.extend(axes.fill(
                     *_rotate_shape(sec_zone2, self.strike), **secondary_kws2))
-            
+
             # Plot the slope face
             if slopeface:
                 slope_kws = _set_kws(slope_kws, color='k', label='Slope Face')
@@ -1513,14 +1513,14 @@ def failure2():
                     *_rotate_shape(lat_lim1, self.strike), **lateral_kws))
                 lateral.extend(axes.plot(
                     *_rotate_shape(lat_lim2, self.strike), **lateral_kws2))
-            
+
             return dict(main=main, secondary=secondary, slope=slope,
                         slip=slip, lateral=lateral)
 
     class WedgeSliding(object):
         """ 
         Kinematic analysis for wedge sliding failures
-        
+
         Parameters
         ----------
         strike : number
@@ -1534,21 +1534,21 @@ def failure2():
             Note that the slope dip should be steeper than the friction angle, or 
             else no wedge sliding zones can be generated.
         """    
-        
+
         def __init__(self, strike, dip, fric_angle=35):
             self.strike = strike
             self.dip = dip
             self.fric_angle = fric_angle
-            
+
             if self.dip <= self.fric_angle:
                 raise ValueError('No wedge sliding zones generated as the input'
                                 ' slope dip is shallower than the friction angle.')
-                
+
         def check_failure(self, bearings, plunges):
             """ 
             Check whether wedge sliding failures are kinematically feasible for a
             sequence of discontinuity intersection lines
-            
+
             Parameters
             ----------
             bearing : number or sequence of numbers
@@ -1566,39 +1566,39 @@ def failure2():
             """    
 
             bearings = (bearings-self.strike)%360
-            
+
             llons, llats = line(plunges, bearings)
             llons = np.degrees(llons)
             daylight = llons >= 90-self.dip-1e-8 # with tolerance
-            
+
             slip = plunges >= self.fric_angle
-            
+
             planar = llons <= 90-self.fric_angle+1e-8 # with tolerance
-            
+
             main = slip & daylight
             secondary = ~slip & daylight & planar
-            
+
             return main, secondary
-        
+
         def plot_kinematic(self, secondary_zone=True, construction_lines=True, 
                         slopeface=True, main_kws=None, secondary_kws=None, 
                         friction_kws=None, fplane_kws=None, slope_kws=None, 
                         ax=None):
-            
+
             """
             Generate the wedge sliding kinematic analysis plot for dip vectors. 
             (Note: This plot is used to analyze intersection lines between planes
             of discontinuities, displayed as "line" features instead of poles)
-            
+
             This function plots the following elements on a StereonetAxes: 
             (1) main wedge sliding zone
             (2) secondary wedge sliding zones
             (3) construction lines, i.e. friction cone and friction plane
             (4) slope face
-            
+
             (2)-(4) are optioanl. The style of the elements above can be specified 
             with their kwargs, or on the artists returned by this function later.
-            
+
             Parameters
             ----------
             secondary_zone : boolean
@@ -1621,7 +1621,7 @@ def failure2():
             ax : StereonetAxes
                 The StereonetAxes to plot on. A new StereonetAxes will be generated
                 if set to 'None'. Defaults to 'None'.
-            
+
             Returns
             -------
             result : dictionary
@@ -1640,17 +1640,17 @@ def failure2():
             friction_cone = _shape('cone', angle=90-self.fric_angle-1e-2)  
             envelope = _shape('wedge_envelope', strike=0, 
                             dip=self.dip, angle=self.fric_angle)
-            
+
             # Get the failure zones (as shapely polygons) from geometry interaction
             wedge_zone = envelope.intersection(friction_cone)
             sec_zone = envelope.difference(friction_cone)
-            
+
             # Plotting
             if ax==None:
                 figure, axes = subplots(figsize=(8, 8))
             else:
                 axes = ax
-            
+
             # List of artists to be output
             main = []
             secondary = []
@@ -1664,7 +1664,7 @@ def failure2():
                                 label='Potential Wedge Sliding Zone')
             main.extend(axes.fill(
                 *_rotate_shape(wedge_zone, self.strike), **main_kws))
-            
+
             # Plot the secondary main wedge sliding zones
             if secondary_zone:
                 secondary_kws = _set_kws(secondary_kws, polygon=True,
@@ -1672,7 +1672,7 @@ def failure2():
                                         label='Secondary Wedge Sliding Zone')
                 secondary.extend(axes.fill(
                     *_rotate_shape(sec_zone, self.strike), **secondary_kws))
-                
+
             # Plot the slope face
             if slopeface:
                 slope_kws = _set_kws(slope_kws, color='k', label='Slope Face')
@@ -1716,11 +1716,31 @@ def failure2():
         return geographic2plunge_bearing(lon, lat)
 
 
-    discontinuity = np.loadtxt('kinematic_data1.txt', delimiter=',')
-    intersections = np.loadtxt('kinematic_data2.txt', delimiter=',')
-    jstrikes = discontinuity[:,1] - 90
-    jdips = discontinuity[:,0]
+    # From given discontinuity data
 
+
+
+    # Load data
+    data = json.loads(request.data)
+    strike = int(data['slopeStrike'])
+    dip = int(data['slopeDip'])
+    fricAngle = int(data['fricAngle'])
+    print(strike)
+    print(dip)
+    jstrikes_str = ''.join(data['jstrikes'].split())
+    jdips_str = ''.join(data['jdips'].split())
+    #print(jstrikes_str)
+    jstrikes = jstrikes_str.split(",")
+    jdips = jdips_str.split(",")
+    for i in range(0,len(jstrikes)):
+        jstrikes[i] = int(jstrikes[i])-90
+    for j in range(0, len(jdips)):
+        jdips[j] = int(jdips[i])
+    
+    jstrikes = np.array(jstrikes)
+    jdips = np.array(jdips)
+    print(jstrikes)
+    print(jdips)
     ibearings=[]
     iplunges=[]
 
@@ -1733,19 +1753,17 @@ def failure2():
     ibearings=np.array(ibearings)
     iplunges=np.array(iplunges)
 
-    # ibearings = intersections[:,1]
-    # iplunges = intersections[:,0]
 
     # Set up kinematic analysis 
-    strike, dip = 180, 75
-    P3 = PlanarSliding(strike, dip)
-    T3 = FlexuralToppling(strike, dip, latlim=15)
-    #W3 = WedgeSliding(strike, dip)
+    P3 = PlanarSliding(strike, dip, fricAngle)
+    T3 = FlexuralToppling(strike, dip, fricAngle ,latlim=15)
+    W3 = WedgeSliding(strike, dip, fricAngle)
+
 
     # Check data
     mainP, secP = P3.check_failure(jstrikes, jdips)
     mainT, _ = T3.check_failure(jstrikes, jdips)
-    # mainW, secW = W3.check_failure(ibearings, iplunges)
+    mainW, secW = W3.check_failure(ibearings, iplunges)
 
     # Start plotting
     fig = plt.figure(figsize=(15, 6))
@@ -1763,7 +1781,7 @@ def failure2():
     T3.plot_kinematic(ax=ax2, slope_kws={'label':''}, main_kws={'label':''}, 
                     secondary_kws={'label':''})
     # W3.plot_kinematic(ax=ax3, slope_kws={'label':''}, main_kws={'label':''}, 
-    #                 secondary_kws={'label':''})
+    #                   secondary_kws={'label':''})
 
     # Plot planar sliding data
     ax1.pole(jstrikes, jdips, c='k', ms=1, 
@@ -1793,15 +1811,64 @@ def failure2():
         ax.grid(linestyle=':')
         ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05))
 
+        
+    image=cv2.imread("output.jpg")
+    height, width = image.shape[:2]
 
-    with open("output.jpg", "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
+    img_planar=image[0:height,140:int(width/3)+90]
+    img_toppling=image[0:height,int(width/3)+40:int(2*(width/3))+5]
+    img_wedge=image[0:height,int(2*width/3)-30:width-60]
 
-    ret_plot = str(encoded_string)
-    ret_plot = ret_plot[2:]
-    ret_plot = ret_plot[:-1]
+    cv2.imwrite("planar.jpg", img_planar)
+    cv2.imwrite("flexuralToppling.jpg", img_toppling)
 
-    return ret_plot
+    strPlanar = ''
+    strToppling = ''
+
+    countP=0;
+    for i in mainP:
+        if i==True:
+            countP=countP+1
+            
+    countW=0;
+    for i in mainW:
+        if i==True:
+            countW=countW+1
+            
+    countT=0;
+    for i in mainT:
+        if i==True:
+            countT=countT+1
+    ProbP=countP/len(mainP);
+    ProbW=countW/len(mainW);
+    ProbT=countT/len(mainT);
+
+    print(ProbP)
+    print(ProbW)
+    print(ProbT)
+
+    _, im_arr = cv2.imencode('.jpg', img_planar)  # im_arr: image in Numpy one-dim array format.
+    im_bytes = im_arr.tobytes()
+    planar_b64 = base64.b64encode(im_bytes)
+    planar_b64 = str(planar_b64)
+    planar_b64 = planar_b64[2:]
+    planar_b64 = planar_b64[:-1]
+    planar_b64 = 'data:image/jpeg;base64,' + planar_b64
+
+    _, im_arr = cv2.imencode('.jpg', img_toppling)  # im_arr: image in Numpy one-dim array format.
+    im_bytes = im_arr.tobytes()
+    toppling_b64 = base64.b64encode(im_bytes)
+    toppling_b64 = str(toppling_b64)
+    toppling_b64 = toppling_b64[2:]
+    toppling_b64 = toppling_b64[:-1]
+    toppling_b64 = 'data:image/jpeg;base64,' + toppling_b64
+
+
+    ans = {'planar_uri': planar_b64, 'toppling_uri': toppling_b64, 'planar_prob': ProbP, 'toppling_prob': ProbT, 'wedge_prob': ProbW}
+    print(ans)
+
+    return json.dumps(ans)
+    
 
 
 
