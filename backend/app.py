@@ -1716,26 +1716,127 @@ def failure2():
         return geographic2plunge_bearing(lon, lat)
 
 
-    # From given discontinuity data
-
-
-
-    # Load data
     data = json.loads(request.data)
     strike = int(data['slopeStrike'])
     dip = int(data['slopeDip'])
     fricAngle = int(data['fricAngle'])
-    print(strike)
-    print(dip)
-    jstrikes_str = ''.join(data['jstrikes'].split())
-    jdips_str = ''.join(data['jdips'].split())
-    #print(jstrikes_str)
-    jstrikes = jstrikes_str.split(",")
-    jdips = jdips_str.split(",")
-    for i in range(0,len(jstrikes)):
-        jstrikes[i] = int(jstrikes[i])-90
-    for j in range(0, len(jdips)):
-        jdips[j] = int(jdips[i])
+    jdips = []
+    jstrikes = []
+    if data['throughImage'] == "yes":
+        string_data = data['img_uri']
+        string_data = string_data[23:]
+        #print(string_data)
+        binary_data = a2b_base64(string_data)
+        fd = open('input_images/image.png', 'wb')
+        fd.write(binary_data)
+        fd.close()
+
+        image=cv2.imread("input_images/image.png")
+        gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+        height, width = image.shape[:2]
+
+        white_img = np.full((height,width, 3),
+                            0, dtype = np.uint8)
+
+        blur = cv2.GaussianBlur(gray,(5,5),0)
+        bilateral = cv2.bilateralFilter(blur, 7, 50, 50)
+
+        edges = cv2.Canny(bilateral,50,150,apertureSize=3)
+
+        lines = cv2.HoughLinesP(
+                edges, # Input edge image
+                1, # Distance resolution in pixels
+                np.pi/180, # Angle resolution in radians
+                threshold=25, # Min number of votes for valid line
+                minLineLength=10, # Min allowed length of line
+                maxLineGap=15 # Max allowed gap between line for joining them
+                )
+
+        sumOfLengthsOfLines = 0
+        # Iterate over points
+        lines_list = []
+
+        for points in lines:
+            x1,y1,x2,y2=points[0]   
+            sumOfLengthsOfLines =  sumOfLengthsOfLines + ((((x2 - x1 )**2) + ((y2-y1)**2))**0.5)
+
+        avg = sumOfLengthsOfLines/len(lines)
+
+        for points in lines:
+            x1,y1,x2,y2=points[0]
+            if ((((x2 - x1 )**2) + ((y2-y1)**2) )**0.5) >= width*0.08:
+                cv2.line(image,(x1,y1),(x2,y2),(0,0,0),3)
+                cv2.line(white_img,(x1,y1),(x2,y2),(255,255,255),6)
+
+        image2=cv2.imread("input_images/image.png")
+
+        gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+        height, width = image.shape[:2]
+
+        blur = cv2.GaussianBlur(gray,(5,5),0)
+        bilateral = cv2.bilateralFilter(blur, 9, 50, 50)
+        edges = cv2.Canny(bilateral,50,150,apertureSize=3)
+
+        lines = cv2.HoughLinesP(
+                edges, # Input edge image
+                1, # Distance resolution in pixels
+                np.pi/180, # Angle resolution in radians
+                threshold=25, # Min number of votes for valid line
+                minLineLength=10, # Min allowed length of line
+                maxLineGap=10 # Max allowed gap between line for joining them
+                )
+
+        sumOfLengthsOfLines = 0
+        # Iterate over points
+        lines_list = []
+        for points in lines:
+            # Extracted points nested in the list
+            x1,y1,x2,y2=points[0]
+            #  Draw the lines joing the points
+            sumOfLengthsOfLines =  sumOfLengthsOfLines + ((((x2 - x1 )**2) + ((y2-y1)**2))**0.5)
+            # Maintain a simples lookup list for points
+
+        avg = sumOfLengthsOfLines/len(lines)
+        theta=[]
+        linescsv=[]
+        for points in lines:
+            x1,y1,x2,y2=points[0]
+            if ((((x2 - x1 )**2) + ((y2-y1)**2) )**0.5) >=width*0.08:
+                cv2.line(image2,(x1,y1),(x2,y2),(0,255,0),1)
+                linescsv.append(points[0])
+                if x1==x2:
+                    theta.append(90)
+                else:
+                    if(y1==y2):
+                        temptheta=0
+                    else:
+                        temptheta=math.atan((y2-y1)/(x2-x1))*(180/math.pi)
+                    if temptheta<0:
+                        theta.append(temptheta+180)
+                    else:
+                        theta.append(temptheta)
+
+        jdips = theta
+        jstrikes = [int(data['avg_strike']) for i in range(len(theta))]
+        print(jdips)
+        print(jstrikes)
+        
+
+
+
+    # Load data
+    # print(strike)
+    # print(dip)
+    if data['throughImage'] == "no":
+        jstrikes_str = ''.join(data['jstrikes'].split())
+        jdips_str = ''.join(data['jdips'].split())
+        #print(jstrikes_str)
+        jstrikes = jstrikes_str.split(",")
+        jdips = jdips_str.split(",")
+        for i in range(0,len(jstrikes)):
+            jstrikes[i] = int(jstrikes[i])-90
+        for j in range(0, len(jdips)):
+            jdips[j] = int(jdips[i])
     
     jstrikes = np.array(jstrikes)
     jdips = np.array(jdips)

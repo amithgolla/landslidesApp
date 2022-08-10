@@ -70,6 +70,11 @@ function HomeScreen({ navigation }) {
         </TouchableOpacity>
         <TouchableOpacity
             activeOpacity={0.5}
+            onPress={() => navigation.navigate('Kinematic Analysis through image')}>
+            <Text style={styles.HomeButtons}>Kinematic Analysis through image</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+            activeOpacity={0.5}
             onPress={() => navigation.navigate('CollectData')}>
             <Text style={styles.HomeButtons}>Collect Data</Text>
         </TouchableOpacity>
@@ -472,9 +477,10 @@ function KinematicAnalysisScreen({ navigation }) {
 }
 
 function KinematicAnalysisThroughDataScreen({ navigation }) {
-  const [failureParam, setFailureParam] = useState({slopeStrike: -1, slopeDip: -1, fricAngle: 35, jstrikes: "", jdips: ""});
+  const [failureParam, setFailureParam] = useState({slopeStrike: -1, slopeDip: -1, fricAngle: 35, jstrikes: "", jdips: "", throughImage: "no"});
   const [output, setOutput] = useState({});
   const [check, setCheck] = useState(true);
+
 
   const afterClick = async () => {
     //console.log(failureParam);
@@ -530,7 +536,7 @@ function KinematicAnalysisThroughDataScreen({ navigation }) {
           width: 160,
           fontSize:5,
           borderRadius: 10,}}
-          onPress={() => alert("1. Scale should be provided as the true width of the portion captured in meters.\n\n2. UCS should be given in MPa\n\n3. RMR will not be obtained if any of the parameters are missing, but RQD and joint spacing will be obtained if an image is uploaded.\n\n4. Upload a high quality image of the rock mass. Avoid noise such as grass, roads, trees, etc. The estimation may be deviated if the image contains these noise mentioned.")}>
+          onPress={() => alert("1. All the input fields except friction angle are mandatory.\n\n2. Enter the discontinuity strikes seperated by a comma (For eg: 300,245,173,44)\n\n3. Enter discontinuity dips seperated by a comma (For eg: 20,30,70,50)\n\n4. Follow the input format strictly else an error will be obtained.\n\n5. Failure probabilities of planar, wedge and flexural along with their plots will be obtained.")}>
           <Text style={{color:'black',}}>Instructions</Text>
         </TouchableOpacity>
         <TextInput style={styles.input} placeholder="Enter Slope Strike" keyboardType="phone-pad" onChangeText={(value) => setFailureParam({...failureParam, slopeStrike: value})}/>
@@ -557,6 +563,245 @@ function KinematicAnalysisThroughDataScreen({ navigation }) {
         {output['planar_uri'] != ""?<Image source={{uri: output['planar_uri']}} style={{width: 400, height: 450, alignItems: 'center', marginBottom:5, marginTop:5}}/>:null}
         {output['toppling_uri'] != ""?<Image source={{uri: output['toppling_uri']}} style={{width: 400, height: 450, alignItems: 'center', marginBottom:5, marginTop:5}}/>:null}
 
+        
+        </ScrollView>
+    </SafeAreaView>
+  );
+  
+  
+}
+
+function KinematicAnalysisThroughImageScreen({ navigation }) {
+  const [failureParam, setFailureParam] = useState({img_uri: "", slopeStrike: -1, slopeDip: -1, fricAngle: 35, avg_strike: -1, throughImage: "yes"});
+  const [output, setOutput] = useState({});
+  const [check, setCheck] = useState(false);
+  const [isCameraOrGallerySelected, setIsCameraOrGallerySelected] = useState(false);
+
+  const requestCameraPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: 'Camera Permission',
+            message: 'App needs camera permission',
+          },
+        );
+        // If CAMERA Permission is granted
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    } else return true;
+  };
+ 
+  const requestExternalWritePermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          {
+            title: 'External Storage Write Permission',
+            message: 'App needs write permission',
+          },
+        );
+        // If WRITE_EXTERNAL_STORAGE Permission is granted
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        alert('Write permission err', err);
+      }
+      return false;
+    } else return true;
+  };
+
+  const captureImage = async (type) => {
+    let options = {
+      mediaType: type,
+      maxWidth: 300,
+      maxHeight: 550,
+      quality: 1,
+      videoQuality: 'low',
+      durationLimit: 30, //Video max duration in seconds
+      saveToPhotos: true,
+      includeBase64: true,
+    };
+    let isCameraPermitted = await requestCameraPermission();
+    let isStoragePermitted = await requestExternalWritePermission();
+    if (isCameraPermitted && isStoragePermitted) {
+      //console.log('came here');
+      launchCamera(options, (response) => {
+        //console.log('Response = ', response);
+ 
+        if (response.didCancel) {
+          alert('You cancelled the operation');
+          return;
+        } else if (response.errorCode == 'camera_unavailable') {
+          alert('Camera not available on device');
+          return;
+        } else if (response.errorCode == 'permission') {
+          alert('Permission not satisfied');
+          return;
+        } else if (response.errorCode == 'others') {
+          alert(response.errorMessage);
+          return;
+        }
+        setIsCameraOrGallerySelected(true);
+        setCheck(true);
+        var im_uri = 'data:image/jpeg;base64,'+ response['assets'][0]['base64'];
+        setFailureParam({...failureParam, img_uri: im_uri})
+      });
+    }
+  };
+
+
+
+ 
+  const chooseFile = (type) => {
+    
+    let options = {
+      mediaType: type,
+      maxWidth: 300,
+      maxHeight: 550,
+      quality: 1,
+      includeBase64: true,
+    };
+    launchImageLibrary(options, (response) => {
+      //console.log('Response = ', response);
+ 
+      if (response.didCancel) {
+        alert('You cancelled the operation');
+        return;
+      } else if (response.errorCode == 'camera_unavailable') {
+        alert('Camera not available on device');
+        return;
+      } else if (response.errorCode == 'permission') {
+        alert('Permission not satisfied');
+        return;
+      } else if (response.errorCode == 'others') {
+        alert(response.errorMessage);
+        return;
+      }
+      setIsCameraOrGallerySelected(true);
+      setCheck(true);
+      var im_uri = 'data:image/jpeg;base64,'+ response['assets'][0]['base64'];
+      setFailureParam({...failureParam, img_uri: im_uri})
+    });
+  };
+
+
+  const afterClick = async () => {
+    if(failureParam['slopeStrike'] == -1 || failureParam['slopeDip'] == -1 || failureParam['avg_strike'] == -1){
+      alert('Required fields are empty!');
+      return;
+    }
+    const requestOptions = {
+      method: 'POST',
+      body: JSON.stringify(failureParam),
+      headers:{
+        'Accept': 'application/json',
+        'Content-Type':'apapi response in react nativeplication/json'
+      }
+    };
+
+
+  const processFailure2 = async () => {
+    //var array;
+    try {
+      const response = await fetch(
+        'http://10.0.2.2:5000/failure2', requestOptions
+      );
+      var data = await response.json();
+      setCheck(false);
+      setOutput(data);
+      //array = JSON.stringify(data);
+      //console.log(data);
+      
+    } catch (error) {
+      console.error(error);
+      alert('Cannot process')
+      return;
+    }
+  };
+
+  await processFailure2();
+
+
+
+  };
+
+  return (
+    <SafeAreaView style={{flex: 1}}>
+      <ScrollView style={styles.inputsContainer}>
+      <TouchableOpacity
+          activeOpacity={0.5}
+          style={{alignItems: 'center',
+          backgroundColor: "gray",
+          backgroundColor: '#DDDDDD',
+          padding: 2,
+          marginLeft:15,
+          width: 160,
+          fontSize:5,
+          borderRadius: 10,}}
+          onPress={() => alert("1. All the input fields except friction angle are mandatory.\n\n2. Enter the average discontinuity strike, dip data will be obtained from the image\n\n3. Upload a high quality image of the rock mass. Avoid noise such as grass, roads, trees, etc. The estimation may be deviated if the image contains these noise mentioned.\n\n4. Failure probabilities of planar, wedge and flexural along with their plots will be obtained.")}>
+          <Text style={{color:'black',}}>Instructions</Text>
+        </TouchableOpacity>
+        <TextInput style={styles.input} placeholder="Enter Slope Strike" keyboardType="phone-pad" onChangeText={(value) => setFailureParam({...failureParam, slopeStrike: value})}/>
+        <TextInput style={styles.input} placeholder="Enter Slope Dip" keyboardType="phone-pad" onChangeText={(value) => setFailureParam({...failureParam, slopeDip: value})}/>
+        <TextInput style={styles.input} placeholder="Enter Friction Angle(Optional)" keyboardType="phone-pad" onChangeText={(value) => setFailureParam({...failureParam, fricAngle: value})}/>
+        <TextInput style={styles.input} placeholder="Enter average discontinuity strike" keyboardType="phone-pad" onChangeText={(value) => setFailureParam({...failureParam, avg_strike: value})}/>
+        {!isCameraOrGallerySelected?<Text style={styles.textStyle}>Dip data will be taken from the image. Please upload it</Text>:null}
+
+        
+        {!isCameraOrGallerySelected?<TouchableOpacity
+          activeOpacity={0.5}
+          style={{alignItems: 'center',
+          backgroundColor: "gray",
+          backgroundColor: '#DDDDDD',
+          padding: 2,
+          marginVertical: 10,
+          marginLeft: 70,
+          width: 250,
+          borderRadius: 10,}}
+          onPress={() => captureImage('photo')}>
+          <Text style={styles.textStyle}>Camera</Text>
+        </TouchableOpacity>:null}
+
+        {!isCameraOrGallerySelected?<TouchableOpacity
+          activeOpacity={0.5}
+          style={{    alignItems: 'center',
+          backgroundColor: "gray",
+          backgroundColor: '#DDDDDD',
+          padding: 2,
+          marginVertical: 10,
+          marginLeft: 70,
+          width: 250,
+          borderRadius: 10,}}
+          onPress={() => chooseFile('photo')}>
+          <Text style={styles.textStyle}>Gallery</Text>
+        </TouchableOpacity>:null}
+
+        {failureParam['img_uri'] != ""?<Image source={{uri: failureParam['img_uri']}} style={{width: 200, height: 200, margin: 5, alignItems: 'center', marginLeft:95}}/>:null}
+        {check?<TouchableOpacity
+          activeOpacity={0.5}
+          style={{alignItems: 'center',
+          backgroundColor: "gray",
+          backgroundColor: '#DDDDDD',
+          padding: 2,
+          marginVertical: 10,
+          marginLeft: 70,
+          width: 250,
+          borderRadius: 10,}}
+          onPress={() => afterClick()}>
+          <Text style={styles.textStyle}>Process</Text>
+        </TouchableOpacity>:null}
+
+        <Text style={{padding: 5,margin: 5,color: 'black',textAlign: 'center',fontSize:20}}>{output['planar_uri'] != "" ? 'Probability of Planar sliding: '+output['planar_prob']:null}</Text>
+        <Text style={{padding: 5,margin: 5,color: 'black',textAlign: 'center',fontSize:20}}>{output['planar_uri'] != "" ? 'Probability of Flexural toppling: '+output['toppling_prob']:null}</Text>
+        <Text style={{padding: 5,margin: 5,color: 'black',textAlign: 'center',fontSize:20}}>{output['planar_uri'] != "" ? 'Probability of Wedge sliding: '+output['wedge_prob']:null}</Text>
+        {output['planar_uri'] != ""?<Image source={{uri: output['planar_uri']}} style={{width: 400, height: 450, alignItems: 'center', marginBottom:5, marginTop:5}}/>:null}
+        {output['toppling_uri'] != ""?<Image source={{uri: output['toppling_uri']}} style={{width: 400, height: 450, alignItems: 'center', marginBottom:5, marginTop:5}}/>:null}
         
         </ScrollView>
     </SafeAreaView>
@@ -950,6 +1195,7 @@ function MyStack() {
       {/*<Stack.Screen name="Geological Strength Index(GSI)" component={GSIscreen} />*/}
       <Stack.Screen name="Kinematic Analysis" component={KinematicAnalysisScreen} />
       <Stack.Screen name="Kinematic Analysis through data" component={KinematicAnalysisThroughDataScreen} />
+      <Stack.Screen name="Kinematic Analysis through image" component={KinematicAnalysisThroughImageScreen} />
       <Stack.Screen name="CollectData" component={DataScreen} />
     </Stack.Navigator>
   );
@@ -1020,7 +1266,7 @@ const styles = StyleSheet.create({
     marginLeft: '11%',
     padding: "2%",
     fontSize:  22,
-    marginTop: '23%'
+    marginTop: '20%'
 
   },
   imageStyle: {
