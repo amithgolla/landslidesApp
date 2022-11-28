@@ -6,7 +6,7 @@ Features of the app
 4. Landslide Susceptibility. Inputting latitude and longitude it outputs the landslide susceptibility at that particular region.
 5. Collect Data. In an event of a landslide. Users can enter landslide data which can be useful for further analysis.
 
-<img src="https://user-images.githubusercontent.com/53003109/204235694-335c230e-c862-4360-9442-5df5ca6e172d.jpg" width="200" height="600">
+<img src="https://user-images.githubusercontent.com/53003109/204235694-335c230e-c862-4360-9442-5df5ca6e172d.jpg" width="400" height="600">
 
 ![Screenshot_20221128-112711_landslides2](https://user-images.githubusercontent.com/53003109/204235694-335c230e-c862-4360-9442-5df5ca6e172d.jpg )
 ![Screenshot_20221128-132907_landslides2](https://user-images.githubusercontent.com/53003109/204235844-e4d71627-20d8-4c0e-a91d-421e3e78a914.jpg)
